@@ -568,6 +568,34 @@ button:disabled{
     filter:brightness(0.96);
     transition:.2s;
 }
+    .daily-summary{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:12px;
+}
+
+.summary-box{
+    background:white;
+    border-radius:10px;
+    padding:10px 16px;
+    box-shadow:0 2px 6px rgba(0,0,0,.08);
+    font-weight:700;
+    color:#003366;
+}
+
+.summary-box span{
+    font-size:20px;
+    margin-left:5px;
+}
+
+@media(max-width:768px){
+
+    .daily-summary{
+        flex-direction:column;
+    }
+
+}
     
 </style>
 </head>
@@ -576,7 +604,7 @@ button:disabled{
 
 <div class="header">
 
-    <img src="logo.jpg" class="logo">
+    <img src="logo.png" class="logo">
 
     <div>
         <div class="header-content">
@@ -792,21 +820,54 @@ button:disabled{
         <option value="PH">PH</option>
     </select>
 
-    <input type="date" id="scheduleDate">
+    <input
+    type="date"
+    id="scheduleDate"
+    onchange="buildScheduleView()">
 
-    <select id='scheduleSupervisor'>
+
+    <select
+    id='scheduleSupervisor'
+    onchange="buildScheduleView()">
         <option>All Supervisors</option>
     </select>
 
-    <button onclick='buildScheduleView()'>
-        Show Schedule
-    </button>
+    <button onclick="
+document.getElementById('scheduleSupervisor').value='All Supervisors';
+document.getElementById('agentSearch').value='';
+buildScheduleView();
+">
+    👥 Show All Agents
+</button>
 
     <input
         type="text"
         id="agentSearch"
         placeholder="🔍 Search Agent..."
         onkeyup="buildScheduleView()">
+</div>
+    <div id="dailySummaryBar" class="daily-summary">
+
+    <div class="summary-box">
+        ✅ Working:
+        <span id="dvWorking">0</span>
+    </div>
+
+    <div class="summary-box">
+        📋 Leaves:
+        <span id="dvPTO">0</span>
+    </div>
+
+    <div class="summary-box">
+        🚦 Attendance:
+        <span id="dvAttendance">0</span>
+    </div>
+
+    <div class="summary-box">
+        ⚫ OFF:
+        <span id="dvOff">0</span>
+    </div>
+
 </div>
     
 <div class='panel'>
@@ -3128,11 +3189,11 @@ let rows = [...sourceData].filter(r => {
 
                 if(ptoRecord){
 
-                    let reason =
-                        (ptoRecord.Reason || '')
-                        .toUpperCase();
-
-                    if(reason.includes('VACATION'))
+                let reason =
+                (ptoRecord.Reason || '')
+                .toUpperCase();
+    
+                 if(reason.includes('VACATION'))
                         return 1;
 
                     if(
@@ -3207,9 +3268,79 @@ let rows = [...sourceData].filter(r => {
 
 }
 
+    let workingCount = 0;
+    let ptoCount = 0;
+    let attendanceCount = 0;
+    let offCount = 0;
+
     let html = '';
 
-    rows.forEach(r => {
+rows.sort((a,b) => {
+
+    function getCategory(record){
+
+        let shift = record[day] || 'OFF';
+
+        let ptoRecord = ptoList.find(x =>
+
+            (x.Name || '').trim().toUpperCase() ===
+            (record.Name || '').trim().toUpperCase()
+
+            &&
+
+            getPTODate(x) === selectedDate
+
+        );
+
+        if(ptoRecord){
+            return 1; // Leaves
+        }
+
+        let calledOffRecord = calledOffList.find(x =>
+
+            (x.Name || '').trim().toUpperCase() ===
+            (record.Name || '').trim().toUpperCase()
+
+            &&
+
+            normalizeDate(
+                x['EST Date']
+            ) === selectedDate
+
+        );
+
+        if(calledOffRecord){
+            return 2; // Attendance Alerts
+        }
+
+        if(
+            shift.toString()
+                 .trim()
+                 .toUpperCase() === 'OFF'
+        ){
+            return 4; // OFF
+        }
+
+        return 3; // Working
+    }
+
+    let av = getCategory(a);
+    let bv = getCategory(b);
+
+    if(av !== bv){
+        return av - bv;
+    }
+
+    return (a.Name || '')
+        .localeCompare(
+            b.Name || ''
+        );
+
+});
+
+rows.forEach(r => {
+
+let category = 'WORKING';
 
 let shift = r[day] || 'OFF';
 
@@ -3221,6 +3352,7 @@ if(
     shift.toString().trim().toUpperCase() === 'OFF'
 ){
     status = '⚫ OFF';
+    category = 'OFF';
 }
 
 let ptoRecord = ptoList.find(x =>
@@ -3239,6 +3371,8 @@ let ptoRecord = ptoList.find(x =>
 );
 
 if(ptoRecord){
+
+    category = 'PTO';
 
     let reason =
         (ptoRecord.Reason || '')
@@ -3300,6 +3434,8 @@ let calledOffRecord = calledOffList.find(x =>
 
 if(calledOffRecord){
 
+    category = 'ATTENDANCE';
+
     let reason =
         (calledOffRecord.Reason || '')
         .toUpperCase();
@@ -3333,7 +3469,21 @@ if(calledOffRecord){
     }
 
 }
+if(category === 'WORKING'){
+    workingCount++;
+}
 
+if(category === 'PTO'){
+    ptoCount++;
+}
+
+if(category === 'ATTENDANCE'){
+    attendanceCount++;
+}
+
+if(category === 'OFF'){
+    offCount++;
+}
 let rowClass =
     shift.toString().trim().toUpperCase() === 'OFF'
     ? 'roster-off'
@@ -3379,6 +3529,18 @@ let rowClass =
     document.querySelector(
         '#scheduleTable tbody'
     ).innerHTML = html;
+   
+    document.getElementById('dvWorking').textContent =
+    workingCount;
+
+    document.getElementById('dvPTO').textContent =
+    ptoCount;
+
+    document.getElementById('dvAttendance').textContent =
+    attendanceCount;
+
+    document.getElementById('dvOff').textContent =
+    offCount;
 }
 
     function toProperCase(name){

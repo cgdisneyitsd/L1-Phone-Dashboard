@@ -877,18 +877,6 @@ input:disabled{
          style="margin-top:15px;margin-bottom:15px;">
     </div>
 
-    <div id="forecastDetailsPanel"
-     class="panel"
-     style="display:none;margin-bottom:15px;">
-
-    <h3 id="forecastDetailsTitle">
-        Details
-    </h3>
-
-    <div id="forecastDetailsContent"></div>
-
-</div>
-
     <div id="coverageTimelinePanel"
          class="panel">
     </div>
@@ -1362,11 +1350,6 @@ let calledOffList = [];
 let currentWorkingAgents = [];
 let supervisorStatsData = {};
 let supervisorDetailsData = {};
-    
-let forecastScheduledAgents = [];
-let forecastPresentAgents = [];
-let forecastLeaveAgents = [];
-let forecastAbsentAgents = [];
 
 let sortColumn = '';
 let sortAsc = true;
@@ -3099,7 +3082,7 @@ let coRecord = calledOffList.find(x =>
 
     &&
 
-    normalizeDate(x['EST Date']) === selectedDate
+    isAgentCalledOff(x, r)
 
 );
 
@@ -3593,94 +3576,59 @@ function buildDailyOverview(){
 
     let scheduled = 0;
 
-forecastScheduledAgents = [];
-forecastPresentAgents = [];
-forecastLeaveAgents = [];
-forecastAbsentAgents = [];
+    data.forEach(r => {
 
-data.forEach(r => {
+        let shift = r[dayName];
 
-    let shift = r[dayName];
-
-    if(
-        shift &&
-        shift.toString().trim().toUpperCase() !== 'OFF'
-    ){
-
-        scheduled++;
-
-        forecastScheduledAgents.push({
-            name:r.Name
-        });
-
-    }
-
-});
-forecastLeaveAgents =
-    ptoList
-    .filter(x =>
-        getPTODate(x) === selectedDate
-    )
-    .map(x => ({
-        name:x.Name,
-        reason:x.Reason || 'Leave'
-    }));
-
-    forecastAbsentAgents =
-    calledOffList
-    .filter(x =>
-        normalizeDate(
-            x['EST Date']
-        ) === selectedDate
-    )
-    .map(x => ({
-        name:x.Name,
-        reason:x.Reason || 'Called Off'
-    }));
-
-    forecastPresentAgents =
-    forecastScheduledAgents.filter(agent => {
-
-        let onLeave =
-            forecastLeaveAgents.some(
-                x =>
-                x.name === agent.name
-            );
-
-        let absent =
-            forecastAbsentAgents.some(
-                x =>
-                x.name === agent.name
-            );
-
-        return !onLeave && !absent;
+        if(
+            shift &&
+            shift.toString().trim().toUpperCase() !== 'OFF'
+        ){
+            scheduled++;
+        }
 
     });
+
+    let leave =
+        ptoList.filter(x =>
+            getPTODate(x) === selectedDate
+        ).length;
+
+    let absenteeism =
+        calledOffList.filter(x =>
+            normalizeDate(
+                x['EST Date']
+            ) === selectedDate
+        ).length;
+
+    let expected =
+        scheduled -
+        leave -
+        absenteeism;
+
     let html = `
 
 
-    <div class="forecast-stat-card clickable-card"
-     onclick="showForecastCardDetails('scheduled')">
-    <div class="forecast-stat-title">
-        👥 Scheduled
+    <div class="card"
+         style="border-top:5px solid #0d6efd;">
+        <h3>👥 Scheduled</h3>
+        <div class="value">${scheduled}</div>
     </div>
-    <div class="forecast-stat-value" id="scheduledCount">0</div>
-</div>
 
-        <div class="forecast-stat-card clickable-card"
-     onclick="showForecastCardDetails('present')">
+        <div class="card"
+         style="border-top:5px solid #28a745;">
         <h3>✅ Present</h3>
         <div class="value">${expected}</div>
     </div>
 
-    <div class="forecast-stat-card clickable-card"
-     onclick="showForecastCardDetails('leave')">
+    <div class="card"
+         style="border-top:5px solid #17a2b8;">
         <h3>📋 Leave</h3>
         <div class="value">${leave}</div>
     </div>
 
-    <div class="forecast-stat-card clickable-card"
-     onclick="showForecastCardDetails('absent')">
+    <div class="card"
+         style="border-top:5px solid #dc3545;">
         <h3>🚫 Absenteeism</h3>
         <div class="value">${absenteeism}</div>
     </div>

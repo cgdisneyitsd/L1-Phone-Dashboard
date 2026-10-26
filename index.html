@@ -3312,7 +3312,11 @@ w.sort((a, b) => {
 });
     currentWorkingAgents =
     w.map(x =>
-        x.name.toUpperCase().trim()
+        (x.name || '')
+        .replace(/\r/g,'')
+        .replace(/\s+/g,' ')
+        .trim()
+        .toUpperCase()
     );
 
 document.getElementById('workingList').innerHTML =
@@ -4675,11 +4679,17 @@ let rowClass =
     }
 
     let pasted =
-        document.getElementById('agentPaste')
-        .value
-        .split('\n')
-        .map(x => x.trim().toUpperCase())
-        .filter(Boolean);
+    document.getElementById('agentPaste')
+    .value
+    .split('\n')
+    .map(x =>
+        x
+        .replace(/\r/g,'')
+        .replace(/\s+/g,' ')
+        .trim()
+        .toUpperCase()
+    )
+    .filter(Boolean);
 
 let found = [];
 let missing = [];

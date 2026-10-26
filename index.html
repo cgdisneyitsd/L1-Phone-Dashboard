@@ -537,6 +537,7 @@ button:disabled{
 .row-michael{
     background:#dcfce7;
 }
+
 #rosterTable .row-manilyn td{
     background:#fde2f3;
 }
@@ -605,6 +606,13 @@ input:disabled{
     cursor:not-allowed;
     opacity:.75;
 }
+    .roster-est td{
+    background:#eff6ff !important;
+}
+
+.roster-ph td{
+    background:#f0fdf4 !important;
+}
     
 </style>
 </head>
@@ -655,6 +663,7 @@ input:disabled{
 <div class='tabs'>
 <button class='tab-btn active' onclick="showTab('lookupTab',this)">🔍 Dashboard</button>
 <button class='tab-btn' onclick="showTab('supervisorTab',this)">📈 Supervisor Summary</button>
+<button class='tab-btn' onclick="showTab('forecastTab',this)">📊 Coverage Forecast</button>
 <button class='tab-btn' onclick="showTab('scheduleTab',this)">📅 Daily View</button>
 <button class='tab-btn' onclick="showTab('rosterTab',this)">📊 Weekly View</button>
 <button class='tab-btn' onclick="showTab('ptoTab',this)">📋 Leaves</button>
@@ -841,10 +850,36 @@ input:disabled{
 </div>
 
     <div class="cards" id="supervisorSummaryCards">
+</div>
+
+</div>
+
+<div id="forecastTab" style="display:none">
+
+    <div class="view-hint">
+        📊 Full-day staffing coverage forecast.
+    </div>
+
+    <div class="controls">
+
+        <input
+            type="date"
+            id="forecastDate">
+
+        <button onclick="refreshForecast()">
+            Show Forecast
+        </button>
 
     </div>
 
-</div>
+    <div id="dailyOverviewCards"
+         class="cards"
+         style="margin-top:15px;margin-bottom:15px;">
+    </div>
+
+    <div id="coverageTimelinePanel"
+         class="panel">
+    </div>
 
 </div>
     
@@ -946,12 +981,6 @@ input:disabled{
 </div>
 
 <div class="controls">
-
-    <select id="rosterTimezone"
-        onchange="buildRosterView()">
-        <option value="EST">EST</option>
-        <option value="PH">PH</option>
-    </select>
 
     <select id="rosterSupervisor"
                 onchange="buildRosterView()">
@@ -1386,12 +1415,9 @@ let search =
     ?.value
     .toUpperCase() || '';
 
-let sourceData =
-    document.getElementById('rosterTimezone')?.value === 'PH'
-    ? phData
-    : estData;
-
-let rows = sourceData.filter(r => {
+let rows = [...estData];
+    
+    rows = rows.filter(r => {
 
     let supervisorMatch =
         supervisor === 'All Supervisors' ||
@@ -1443,6 +1469,19 @@ let rows = sourceData.filter(r => {
 }
 console.log(rows[0]);
 rows.forEach(r=>{
+    let phRow = phData.find(x =>
+
+    (x.Name || '')
+        .trim()
+        .toUpperCase()
+
+    ===
+
+    (r.Name || '')
+        .trim()
+        .toUpperCase()
+
+);
 
 let supervisorClass = '';
 
@@ -1468,34 +1507,77 @@ else if(supervisorName.includes('MICHAEL'))
 
 html += `
 <tr class="${supervisorClass}">
+
     <td>${r.Name || ''}</td>
 
-    <td class="${(r['Monday'] || 'OFF') === 'OFF' ? 'roster-off' : ''}">
-        ${r['Monday'] || 'OFF'}
+
+    <td>
+    <div style="color:#003366;font-weight:bold;">
+        🇺🇸 ${r['Monday'] || 'OFF'}
+    </div>
+
+    <div style="color:#14532d;font-weight:bold;">
+        🇵🇭 ${phRow?.['Monday'] || 'OFF'}
+    </div>
+    </td>
+    <td>
+    <div style="color:#003366;font-weight:bold;">
+        🇺🇸 ${r['Tuesday'] || 'OFF'}
+    </div>
+
+    <div style="color:#14532d;font-weight:bold;">
+        🇵🇭 ${phRow?.['Tuesday'] || 'OFF'}
+    </div>
     </td>
 
-    <td class="${(r['Tuesday'] || 'OFF') === 'OFF' ? 'roster-off' : ''}">
-        ${r['Tuesday'] || 'OFF'}
+        <td>
+    <div style="color:#003366;font-weight:bold;">
+        🇺🇸 ${r['Wednesday'] || 'OFF'}
+    </div>
+
+    <div style="color:#14532d;font-weight:bold;">
+        🇵🇭 ${phRow?.['Wednesday'] || 'OFF'}
+    </div>
     </td>
 
-    <td class="${(r['Wednesday'] || 'OFF') === 'OFF' ? 'roster-off' : ''}">
-        ${r['Wednesday'] || 'OFF'}
+        <td>
+    <div style="color:#003366;font-weight:bold;">
+        🇺🇸 ${r['Thursday'] || 'OFF'}
+    </div>
+
+    <div style="color:#14532d;font-weight:bold;">
+        🇵🇭 ${phRow?.['Thursday'] || 'OFF'}
+    </div>
     </td>
 
-    <td class="${(r['Thursday'] || 'OFF') === 'OFF' ? 'roster-off' : ''}">
-        ${r['Thursday'] || 'OFF'}
+        <td>
+    <div style="color:#003366;font-weight:bold;">
+        🇺🇸 ${r['Friday'] || 'OFF'}
+    </div>
+
+    <div style="color:#14532d;font-weight:bold;">
+        🇵🇭 ${phRow?.['Friday'] || 'OFF'}
+    </div>
     </td>
 
-    <td class="${(r['Friday'] || 'OFF') === 'OFF' ? 'roster-off' : ''}">
-        ${r['Friday'] || 'OFF'}
+        <td>
+    <div style="color:#003366;font-weight:bold;">
+        🇺🇸 ${r['Saturday'] || 'OFF'}
+    </div>
+
+    <div style="color:#14532d;font-weight:bold;">
+        🇵🇭 ${phRow?.['Saturday'] || 'OFF'}
+    </div>
     </td>
 
-    <td class="${(r['Saturday'] || 'OFF') === 'OFF' ? 'roster-off' : ''}">
-        ${r['Saturday'] || 'OFF'}
-    </td>
+        <td>
+    <div style="color:#003366;font-weight:bold;">
+        🇺🇸 ${r['Sunday'] || 'OFF'}
+    </div>
 
-    <td class="${(r['Sunday'] || 'OFF') === 'OFF' ? 'roster-off' : ''}">
-        ${r['Sunday'] || 'OFF'}
+    <div style="color:#14532d;font-weight:bold;">
+        🇵🇭 ${phRow?.['Sunday'] || 'OFF'}
+    </div>
     </td>
 
     <td>${r.Supervisor || ''}</td>
@@ -2208,6 +2290,7 @@ function formatExcelTime(v) {
 
 document.getElementById('lookupTab').style.display = 'none';
 document.getElementById('supervisorTab').style.display = 'none';
+document.getElementById('forecastTab').style.display = 'none';
 document.getElementById('scheduleTab').style.display = 'none';
 document.getElementById('rosterTab').style.display = 'none';
 document.getElementById('ptoTab').style.display = 'none';
@@ -2236,6 +2319,7 @@ function showTab(id, b) {
 
 document.getElementById('lookupTab').style.display = 'none';
 document.getElementById('supervisorTab').style.display = 'none';
+document.getElementById('forecastTab').style.display = 'none';
 document.getElementById('scheduleTab').style.display = 'none';
 document.getElementById('rosterTab').style.display = 'none';
 document.getElementById('ptoTab').style.display = 'none';
@@ -2263,9 +2347,9 @@ document.getElementById('scheduleComparisonTab').style.display = 'none';
         buildRosterView();
     }
 
-    if(id === 'supervisorTab'){
-    refreshSupervisorSummary();
-    }
+    if(id === 'forecastTab'){
+    refreshForecast();
+}
     if(id === 'scheduleComparisonTab'){
 
     loadCompareAgents();
@@ -2297,9 +2381,9 @@ function refreshSupervisorSummary(){
 
     }
 
-    runLookup();
+runLookup();
 
-    buildSupervisorCards();
+buildSupervisorCards();
 
 }
 
@@ -2368,6 +2452,9 @@ document.getElementById('calledOffDate').value =
         new Date().toISOString().split('T')[0];
     
     document.getElementById('supervisorDate').value =
+    new Date().toISOString().split('T')[0];
+
+    document.getElementById('forecastDate').value =
     new Date().toISOString().split('T')[0];
 
     const response = await fetch('./RawData.xlsx');
@@ -2450,8 +2537,8 @@ buildRosterView();
 buildScheduleView();
 
 runLookup();
-
 buildSupervisorCards();
+refreshForecast();
 
 updateClock();
 
@@ -2462,6 +2549,21 @@ clockTimer =
     );
 
 });
+
+    function refreshForecast(){
+
+    let forecastDate =
+        document.getElementById('forecastDate').value;
+
+    document.getElementById('supervisorDate').value =
+        forecastDate;
+
+    runLookup();
+
+    buildDailyOverview();
+
+    buildCoverageTimeline();
+}
 
 function loadSup() {
 
@@ -3450,6 +3552,451 @@ upcomingLunches.length
     
 } // closes runLookup
 
+function buildDailyOverview(){
+
+    const selectedDate =
+        document.getElementById(
+            'supervisorDate'
+        ).value;
+
+    const days = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday'
+    ];
+
+    const dayName =
+        days[
+            new Date(selectedDate).getDay()
+        ];
+
+    let scheduled = 0;
+
+    data.forEach(r => {
+
+        let shift = r[dayName];
+
+        if(
+            shift &&
+            shift.toString().trim().toUpperCase() !== 'OFF'
+        ){
+            scheduled++;
+        }
+
+    });
+
+    let leave =
+        ptoList.filter(x =>
+            getPTODate(x) === selectedDate
+        ).length;
+
+    let absenteeism =
+        calledOffList.filter(x =>
+            normalizeDate(
+                x['EST Date']
+            ) === selectedDate
+        ).length;
+
+    let expected =
+        scheduled -
+        leave -
+        absenteeism;
+
+    let html = `
+
+
+    <div class="card"
+         style="border-top:5px solid #0d6efd;">
+        <h3>👥 Scheduled</h3>
+        <div class="value">${scheduled}</div>
+    </div>
+
+        <div class="card"
+         style="border-top:5px solid #28a745;">
+        <h3>✅ Present</h3>
+        <div class="value">${expected}</div>
+    </div>
+
+    <div class="card"
+         style="border-top:5px solid #17a2b8;">
+        <h3>📋 Leave</h3>
+        <div class="value">${leave}</div>
+    </div>
+
+    <div class="card"
+         style="border-top:5px solid #dc3545;">
+        <h3>🚫 Absenteeism</h3>
+        <div class="value">${absenteeism}</div>
+    </div>
+
+    <div class="card"
+         style="border-top:5px solid #ff9800;">
+        <h3>📉 Lowest Coverage</h3>
+        <div id="lowestCoverageCard">--</div>
+    </div>
+
+    <div class="card"
+         style="border-top:5px solid #6f42c1;">
+        <h3>📈 Highest Coverage</h3>
+        <div id="highestCoverageCard">--</div>
+    </div>
+
+    `;
+
+    document.getElementById(
+        'dailyOverviewCards'
+    ).innerHTML = html;
+
+    buildCoverageForecast();
+}
+    function buildCoverageForecast(){
+
+    let selectedDate =
+        document.getElementById(
+            'supervisorDate'
+        ).value;
+
+    if(!selectedDate) return;
+
+    const days = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday'
+    ];
+
+    let day =
+        days[
+            new Date(selectedDate).getDay()
+        ];
+
+    let lowestCount = 9999;
+    let highestCount = 0;
+
+    let lowestTime = '';
+    let highestTime = '';
+
+    for(let h = 0; h < 24; h++){
+
+        for(let m = 0; m < 60; m += 30){
+
+            let currentTime =
+                String(h).padStart(2,'0')
+                + ':'
+                + String(m).padStart(2,'0');
+
+            let activeAgents = 0;
+
+            data.forEach(r => {
+
+                let shift = r[day];
+
+                if(
+                    !shift ||
+                    shift.toUpperCase() === 'OFF'
+                ){
+                    return;
+                }
+
+                let ptoRecord =
+                    ptoList.find(x =>
+
+                        (x.Name || '')
+                        .trim()
+                        .toUpperCase()
+
+                        ===
+
+                        (r.Name || '')
+                        .trim()
+                        .toUpperCase()
+
+                        &&
+
+                        getPTODate(x)
+                        ===
+                        selectedDate
+                    );
+
+                if(ptoRecord){
+                    return;
+                }
+
+                let attendanceRecord =
+                    calledOffList.find(x =>
+
+                        (x.Name || '')
+                        .trim()
+                        .toUpperCase()
+
+                        ===
+
+                        (r.Name || '')
+                        .trim()
+                        .toUpperCase()
+
+                        &&
+
+                        normalizeDate(
+                            x['EST Date']
+                        ) === selectedDate
+                    );
+
+                if(attendanceRecord){
+                    return;
+                }
+
+                let status =
+                    getStatus(
+                        r,
+                        day,
+                        currentTime
+                    );
+
+                if(status){
+                    activeAgents++;
+                }
+
+            });
+
+            if(activeAgents > highestCount){
+
+                highestCount =
+                    activeAgents;
+
+                highestTime =
+                    currentTime;
+
+            }
+
+            if(activeAgents < lowestCount){
+
+                lowestCount =
+                    activeAgents;
+
+                lowestTime =
+                    currentTime;
+
+            }
+
+        }
+    }
+
+    document.getElementById(
+        'lowestCoverageCard'
+    ).innerHTML =
+        `${formatAMPM(lowestTime)}
+         <br><strong>${lowestCount} agents</strong>`;
+
+    document.getElementById(
+        'highestCoverageCard'
+    ).innerHTML =
+        `${formatAMPM(highestTime)}
+         <br><strong>${highestCount} agents</strong>`;
+}
+
+function buildCoverageTimeline(){
+
+    let selectedDate =
+        document.getElementById(
+            'supervisorDate'
+        ).value;
+
+    if(!selectedDate){
+        return;
+    }
+
+    const days = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday'
+    ];
+
+    let day =
+        days[
+            new Date(selectedDate).getDay()
+        ];
+
+    let html = `
+    <h3>
+        📈 Full Day Coverage Forecast
+    </h3>
+
+    <div style="
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    grid-template-rows:repeat(12,auto);
+    grid-auto-flow:column;
+    gap:10px;
+    margin-top:15px;
+">
+`;
+
+    // <<< STEP 4 GOES HERE >>>
+
+for(let h=0; h<24; h++){
+
+    for(let m=0; m<60; m+=30){
+
+        let currentTime =
+            String(h).padStart(2,'0')
+            + ':'
+            + String(m).padStart(2,'0');
+
+        let expectedCount = 0;
+        let availableCount = 0;
+
+        data.forEach(r => {
+
+let shift = r[day];
+
+if(
+    !shift ||
+    shift.toString().trim().toUpperCase() === 'OFF'
+){
+    return;
+}
+
+let status =
+    getStatus(
+        r,
+        day,
+        currentTime
+    );
+
+if(status){
+    expectedCount++;
+}
+    
+
+            let ptoRecord =
+                ptoList.find(x =>
+
+                    (x.Name || '')
+                    .trim()
+                    .toUpperCase()
+
+                    ===
+
+                    (r.Name || '')
+                    .trim()
+                    .toUpperCase()
+
+                    &&
+
+                    getPTODate(x)
+                    ===
+                    selectedDate
+                );
+
+            if(ptoRecord){
+                return;
+            }
+
+            let attendanceRecord =
+                calledOffList.find(x =>
+
+                    (x.Name || '')
+                    .trim()
+                    .toUpperCase()
+
+                    ===
+
+                    (r.Name || '')
+                    .trim()
+                    .toUpperCase()
+
+                    &&
+
+                    normalizeDate(
+                        x['EST Date']
+                    ) === selectedDate
+                );
+
+            if(attendanceRecord){
+                return;
+            }
+
+            if(status){
+    availableCount++;
+}
+        });
+
+let bgColor = '#e8f5e9';
+let textColor = '#2e7d32';
+
+// Green when Actual = Expected
+if(availableCount === expectedCount){
+
+    bgColor = '#e8f5e9';
+    textColor = '#2e7d32';
+
+}
+// Red when Actual < Expected
+else if(availableCount < expectedCount){
+
+    bgColor = '#ffebee';
+    textColor = '#c62828';
+
+}
+else if(availableCount < 25){
+
+    bgColor = '#fff8e1';
+    textColor = '#ef6c00';
+
+}
+
+html += `
+<div style="
+    padding:8px 10px;
+    border-radius:8px;
+    background:${bgColor};
+    color:${textColor};
+    border-left:4px solid ${textColor};
+    font-size:13px;
+">
+
+    <strong>${formatAMPM(currentTime)}</strong>
+
+    &nbsp;&nbsp;
+
+    Expected:
+    <strong>${expectedCount}</strong>
+
+    &nbsp;|&nbsp;
+
+    Actual:
+    <strong>${availableCount}</strong>
+
+</div>
+`;
+
+    }
+}
+
+    // <<< END OF STEP 4 >>>
+
+    html += `
+        </div>
+    `;
+
+    document.getElementById(
+        'coverageTimelinePanel'
+    ).innerHTML = html;
+
+}
+    
 function buildSupervisorCards(){
 
     let html = '';

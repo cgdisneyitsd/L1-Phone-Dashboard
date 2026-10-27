@@ -695,6 +695,14 @@ input:disabled{
     Show Staffing
 </button>
 
+    <button
+onclick="refreshAttendanceData()"
+style="background:#0d6efd;">
+
+🔄 Refresh Attendance
+
+</button>
+
 </div>
 
 <div class='cards'>
@@ -2272,7 +2280,28 @@ function refreshAllViews(){
     buildCalledOffTable();
 }
   
-    
+    async function refreshAttendanceData(){
+
+    calledOffList =
+        await loadSheet(URLS.calledOff);
+
+    runLookup();
+
+    buildCalledOffTable();
+
+    buildScheduleView();
+
+    buildSupervisorAllDaySummary();
+
+    buildDailyOverview();
+
+    buildCoverageTimeline();
+
+    alert(
+        "✅ Attendance data refreshed"
+    );
+
+}
 function formatExcelTime(v) {
     if (v === '' || v == null) return '';
 
@@ -2598,6 +2627,30 @@ clockTimer =
         updateClock,
         1000
     );
+
+/* AUTO REFRESH ATTENDANCE */
+setInterval(async () => {
+
+    calledOffList =
+        await loadSheet(URLS.calledOff);
+
+    runLookup();
+
+    buildCalledOffTable();
+
+    buildScheduleView();
+
+    buildSupervisorAllDaySummary();
+
+    buildDailyOverview();
+
+    buildCoverageTimeline();
+
+    console.log(
+        "Attendance auto-refreshed"
+    );
+
+}, 60000);
 
 });
 

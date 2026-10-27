@@ -614,6 +614,37 @@ input:disabled{
 .roster-ph td{
     background:#f0fdf4 !important;
 }
+.dropdown{
+    position:relative;
+    display:inline-block;
+}
+
+.dropdown-content{
+    display:none;
+    position:absolute;
+    background:white;
+    min-width:220px;
+    box-shadow:0 6px 15px rgba(0,0,0,.15);
+    border-radius:10px;
+    z-index:999;
+    overflow:hidden;
+}
+
+.dropdown-content a{
+    display:block;
+    padding:12px 15px;
+    text-decoration:none;
+    color:#003366;
+    font-weight:600;
+}
+
+.dropdown-content a:hover{
+    background:#eef6ff;
+}
+
+.dropdown:hover .dropdown-content{
+    display:block;
+}
     
 </style>
 </head>
@@ -659,17 +690,86 @@ input:disabled{
 
 </div>
 
-<div class='tabs'>
-<button class='tab-btn active' onclick="showTab('lookupTab',this)">🔍 Dashboard</button>
-<button class='tab-btn' onclick="showTab('supervisorTab',this)">📈 Supervisor Summary</button>
-<button class='tab-btn' onclick="showTab('forecastTab',this)">📊 Coverage Forecast</button>
-<button class='tab-btn' onclick="showTab('scheduleTab',this)">📅 Daily View</button>
-<button class='tab-btn' onclick="showTab('rosterTab',this)">📊 Weekly View</button>
-<button class='tab-btn' onclick="showTab('ptoTab',this)">📋 Leaves</button>
-<button class='tab-btn' onclick="showTab('calledOffTab',this)">🚫 Absenteeism</button>
-<button class='tab-btn' onclick="showTab('attendanceFormTab',this)">📝 Attendance Form</button>
-<button class='tab-btn' onclick="showTab('missingTab',this)">🔎 Missing Agent Checker</button>
-<button class='tab-btn' onclick="showTab('scheduleComparisonTab',this)">📝 Schedule Comparison</button>
+<div class="tabs">
+
+    <div class="dropdown">
+        <button class="tab-btn active"
+                onclick="showTab('lookupTab',this)">
+            🔍 Dashboard
+        </button>
+    </div>
+
+    <div class="dropdown">
+
+        <button class="tab-btn">
+            📅 Schedule ▼
+        </button>
+
+        <div class="dropdown-content">
+
+            <a href="#"
+               onclick="showTab('scheduleTab',this)">
+               📅 Daily View
+            </a>
+
+            <a href="#"
+               onclick="showTab('rosterTab',this)">
+               📊 Weekly View
+            </a>
+
+            <a href="#"
+               onclick="showTab('scheduleComparisonTab',this)">
+               📝 Schedule Comparison
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="dropdown">
+
+        <button class="tab-btn">
+            👥 Attendance ▼
+        </button>
+
+        <div class="dropdown-content">
+
+            <a href="#"
+               onclick="showTab('ptoTab',this)">
+               📋 Leaves
+            </a>
+
+            <a href="#"
+               onclick="showTab('calledOffTab',this)">
+               🚫 Absenteeism
+            </a>
+
+            <a href="#"
+               onclick="showTab('attendanceFormTab',this)">
+               📝 Attendance Form
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="dropdown">
+
+        <button class="tab-btn">
+            🛠 Tools ▼
+        </button>
+
+        <div class="dropdown-content">
+
+            <a href="#"
+               onclick="showTab('missingTab',this)">
+               🔎 Missing Agent Checker
+            </a>
+
+        </div>
+
+    </div>
+
 </div>
 
 <div id='lookupTab'>

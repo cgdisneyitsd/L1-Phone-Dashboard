@@ -2406,11 +2406,26 @@ async function loadSheet(url){
 
     const csv = await response.text();
 
-    return Papa.parse(csv,{
+    const parsed = Papa.parse(csv,{
         header:true,
-        skipEmptyLines:true
+        skipEmptyLines:'greedy'
     }).data;
+
+    return parsed.filter(row => {
+
+        const name =
+            (row.Name || '').toString().trim();
+
+        return (
+            name !== '' &&
+            name !== "'" &&
+            name !== '""'
+        );
+
+    });
+
 }
+    
     
 window.addEventListener('load', async () => {
 

@@ -2414,9 +2414,10 @@ async function loadSheet(url){
     
 window.addEventListener('load', async () => {
 
-    const test = await loadSheet(URLS.calledOff);
+    calledOffList = await loadSheet(URLS.calledOff);
 
-console.log("GOOGLE TEST", test);
+console.log("CALLED OFF", calledOffList);
+
     
     document.getElementById(
     'missingCheckBtn'

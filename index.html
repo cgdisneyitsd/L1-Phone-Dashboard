@@ -3022,6 +3022,17 @@ function isAgentOnPTO(ptoRecord, rosterRecord){
     const shift =
         rosterRecord[dayName];
 
+    console.log(
+    "PTO DEBUG",
+    {
+        Agent: ptoRecord.Name,
+        PTODate: ptoDate,
+        DayName: dayName,
+        Shift: shift,
+        SelectedDate: document.getElementById('selectedDate').value
+    }
+);
+
     if(
         !shift ||
         shift.toUpperCase() === 'OFF'
@@ -3081,6 +3092,17 @@ function isAgentOnPTO(ptoRecord, rosterRecord){
     end
 );
 
+    console.log(
+    "PTO SHIFT CHECK",
+    {
+        Agent: ptoRecord.Name,
+        Now: now,
+        Start: start,
+        End: end,
+        Result: now >= start && now < end
+    }
+);
+    
 return now >= start && now < end;
 }
     function normalizeDate(value) {

@@ -2544,20 +2544,15 @@ if (wb.Sheets['PTO']) {
     console.log("PTO COUNT:", ptoList.length);
     console.log("FIRST PTO:", ptoList[0]);
     
-// Called OFF Sheet
-let calledOffSheet =
-    wb.SheetNames.find(
-        x => x.toUpperCase().includes('CALLED')
-    );
+calledOffList =
+    await loadSheet(URLS.calledOff);
 
-if(calledOffSheet){
-    console.log("CALLED OFF SHEET FOUND");
+console.table(calledOffList);
 
-    calledOffList = XLSX.utils.sheet_to_json(
-        wb.Sheets[calledOffSheet],
-        { defval:'' }
-    );
-}
+console.log(
+    "CALLED OFF COUNT:",
+    calledOffList.length
+);
     console.log("CALLED OFF DATA", calledOffList);
     console.log("CALLED OFF ROWS", calledOffList.length);
     console.log("CALLED OFF COUNT:", calledOffList.length);

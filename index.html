@@ -3407,6 +3407,24 @@ if(
 
         let st = getStatus(r, d, i);
 
+if(
+    (r.Name || '')
+    .toUpperCase()
+    .includes('NAGOR')
+){
+    console.log(
+        'NAGOR',
+        {
+            Day:d,
+            Time:i,
+            Shift:r[d],
+            Status:st,
+            PTO:ptoRecord,
+            Supervisor:r.Supervisor
+        }
+    );
+}
+
         if (!st)
             return;
 

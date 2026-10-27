@@ -1360,6 +1360,28 @@ let ptoSortAsc = true;
 let attendanceSortColumn = '';
 let attendanceSortAsc = true;
 let realtimeMode = false;
+    const SHEET_ID = '13whMJorFWHuylEfFDwbB30yobPtQ_G3EfAZtv040kQE';
+
+const URLS = {
+
+    est:
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=1744579532`,
+
+    ph:
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=574343014`,
+
+    estOld:
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=1905554286`,
+
+    phOld:
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=2104243158`,
+
+    pto:
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=1297010746`,
+
+    calledOff:
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=2139820898`
+};
 let realtimeTimer = null;
 let clockTimer = null;
 
@@ -2377,8 +2399,24 @@ const selectedTime =
 buildSupervisorAllDaySummary();
 
 }
+    
+async function loadSheet(url){
 
+    const response = await fetch(url);
+
+    const csv = await response.text();
+
+    return Papa.parse(csv,{
+        header:true,
+        skipEmptyLines:true
+    }).data;
+}
+    
 window.addEventListener('load', async () => {
+
+    const test = await loadSheet(URLS.calledOff);
+
+console.log("GOOGLE TEST", test);
     
     document.getElementById(
     'missingCheckBtn'

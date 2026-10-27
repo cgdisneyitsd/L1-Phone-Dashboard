@@ -2103,13 +2103,22 @@ return (
 
 }
     
-function getSelectedDay() {
+function getSelectedDay(){
 
     let selectedDate =
         document.getElementById('selectedDate').value;
 
-    if (!selectedDate)
+    if(!selectedDate){
         return 'Monday';
+    }
+
+    let parts = selectedDate.split('-');
+
+    let year  = parseInt(parts[0]);
+    let month = parseInt(parts[1]) - 1;
+    let day   = parseInt(parts[2]);
+
+    let d = new Date(year, month, day);
 
     const days = [
         'Sunday',
@@ -2121,9 +2130,7 @@ function getSelectedDay() {
         'Saturday'
     ];
 
-    return days[
-        new Date(selectedDate).getDay()
-    ];
+    return days[d.getDay()];
 }
 
 function getOffsetHours(){
